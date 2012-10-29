@@ -1,11 +1,11 @@
-# yhid
+# mesto
 
-[ju:hi:d] Your Happy In-browser/In-memory Database.
-
+MEmory STOrage
 
 ## About
 
-Yhid is a in-memory only storage, intended for use in Rich Browser Applications.
+Mesto is a in-memory only storage, intended for use in Rich Browser
+Applications.
 
 
 ## Usage
