@@ -17,8 +17,14 @@
     (testing "Finding by index"
       (is (= data (me/get-in [:items 0]))))))
 
-;; (deftest advanced-assoc
-;;   (me/assoc-in [:items] [{:id 1 :name "foo"}])
-;;   (testing "Assoc by filter"
-;;     (me/assoc-in [:items {:id 1}] :name "bar")
-;;     (is (= "bar" (me/get-in [:items {:id 1} :name])))))
+(deftest advanced-assoc
+  (me/assoc-in [:items] [{:id 1 :name "foo"}])
+  (testing "Assoc by filter"
+    (me/assoc-in [:items {:id 1} :name] "bar")
+    (is (= "bar" (me/get-in [:items {:id 1} :name])))))
+
+(deftest advanced-update
+  (me/assoc-in [:items] [{:id :foo :votes 1}])
+  (testing "Update by filter"
+    (me/update-in [:items {:id :foo} :votes] inc)
+    (is (= 2 (me/get-in [:items {:id :foo} :votes])))))

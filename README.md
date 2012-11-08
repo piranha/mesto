@@ -13,7 +13,7 @@ Applications.
 ### Basic
 
 This is fairly simple `assoc-in` call, identical to one from `clojure.core` (but
-only operating on an inner storage of Yhid).
+only operating on an inner storage of Mesto).
 
     (y/assoc-in [:countries :ukraine] {:capital "Kyiv" :location "Europe"})
 
@@ -60,7 +60,7 @@ handler being called.
 
 - `(assoc-in [:items {:id 1} :name] "something")`
 
-  **NOT IMPLEMENTED** (works as `clojure.core/assoc-in` right now)
+  **NEEDS DECISION**
 
   Puts "x" in item, found by filter `{:id 1}`. If item does not exist, creates
   it based off filter and appends it in a sequence. If sequence does not exist,
@@ -71,6 +71,10 @@ handler being called.
   prevent creation of new elements. Makes it possible to have arbitrary
   functions as filters
 
+- `(update-in [:items {:id 1}] fn)`
+
+  Works like `assoc-in`.
+
 - `(all-in [:items {:id 1} :name])`
 
   Returns all the items matched by path.
@@ -79,11 +83,9 @@ handler being called.
 
   Returns first item matched by path.
 
-- `(update-in [:items {:id 1}] fn)`
-
-  **NOT IMPLEMENTED**2
-
 - `(on [items {:id 1}] (fn [path value] (log path value)))`
+
+  **NOT IMPLEMENTED**
 
   Notifies when change occurs in path (i.e. if changes appear at or inside
   whatever happens to be matched by given path). `path` argument holds full path
