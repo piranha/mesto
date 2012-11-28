@@ -1,6 +1,6 @@
-(ns net.solovyov.mesto.core-test
+(ns solovyov.mesto-test
   (:use clojure.test)
-  (:require [net.solovyov.mesto.core :as me]))
+  (:require [solovyov.mesto :as me]))
 
 (deftest simple-assoc
   (testing "Simple assoc"
@@ -28,3 +28,8 @@
   (testing "Update by filter"
     (me/update-in [:items {:id :foo} :votes] inc)
     (is (= 2 (me/get-in [:items {:id :foo} :votes])))))
+
+(deftest simple-event-handler
+  (me/on [:test] (fn [data path] (throw (Exception.))))
+  (testing "Event by path"
+    (is (thrown? Exception (me/assoc-in [:test] "foo")))))

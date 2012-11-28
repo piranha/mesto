@@ -1,4 +1,4 @@
-(ns net.solovyov.mesto.core
+(ns solovyov.mesto
   (:refer-clojure :exclude [update-in assoc-in get-in])
   (:require [clojure.core :as cj]))
 
@@ -55,17 +55,35 @@
   [data path]
   (cartesian-product (gather-paths-bits data path)))
 
+;; events notification
+
+(defn- notify
+  ([data path]
+     (notify data path (data :handlers)))
+  ([data path handlers]
+     (when-not (empty? handlers)
+
+       (doseq [f (handlers :_handlers [])]
+         (f data path))
+
+       (if-not (empty? path)
+         (let [condition (first path)
+               rest-path (rest path)]
+           (notify (data condition) rest-path (handlers condition)))))))
+
 ;; api
 
 (defn assoc-in
   [path value]
   (doseq [real-path (paths-to @world path)]
-    (swap! world cj/assoc-in real-path value)))
+    (swap! world cj/assoc-in real-path value)
+    (notify @world real-path)))
 
 (defn update-in
   [path f & args]
   (doseq [real-path (paths-to @world path)]
-    (apply swap! world cj/update-in real-path f args)))
+    (apply swap! world cj/update-in real-path f args)
+    (notify @world real-path)))
 
 (defn all-in
   ([path] (all-in @world path))
@@ -79,3 +97,11 @@
 (defn get-in
   [path]
   (first (all-in path)))
+
+(defn on
+  [path handler]
+  (let [full-path (cons :handlers path)
+        handlers-path (cons :handlers (conj path :_handlers))]
+    (if-not (get-in full-path)
+      (swap! world cj/assoc-in handlers-path #{}))
+    (swap! world cj/update-in handlers-path conj handler)))
