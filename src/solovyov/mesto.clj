@@ -47,7 +47,7 @@
     [condition]
     (map #(.indexOf data %) found)))
 
-(defn gather-paths-bits
+(defn- gather-paths-bits
   [data [condition & path]]
   (let [multi-data (multi-get data condition)
         bit (multi-path data multi-data condition)]
@@ -55,7 +55,7 @@
       (apply conj [bit] (mapcat #(gather-paths-bits % path) multi-data))
       [bit])))
 
-(defn paths-to
+(defn- paths-to
   [data path]
   (cartesian-product (gather-paths-bits data path)))
 
@@ -84,18 +84,33 @@
 ;; api
 
 (defn assoc-in
+  "Associates a value in a nested associative structure, where path is a
+  sequences of keys and filters and value is a new value. Returns a new nested
+  structure.
+
+  If any levels do not exists, creates hash-maps for keys and fails for filters."
   [path value]
   (doseq [real-path (paths-to @world path)]
     (swap! world cj/assoc-in real-path value)
-    (notify @world real-path)))
+    (notify @world real-path))
+  @world)
 
 (defn update-in
+  "Updates a value in a nested associative structure, where path is a sequences
+  of keys and filters, f is a function that will take the old value and any
+  supplied args and return the new value. Returns a new nested structure.
+
+  If any levels do not exists, creates hash-maps for keys and fails for filters."
   [path f & args]
   (doseq [real-path (paths-to @world path)]
     (apply swap! world cj/update-in real-path f args)
-    (notify @world real-path)))
+    (notify @world real-path))
+  @world)
 
 (defn all-in
+  "Returns all found values in a nested associative structure, where ks is a
+  sequence of keys and filters. Returns nil if the key is not present, or the
+  not-found value if supplied."
   ([path] (all-in @world path))
   ([data [condition & path]]
      (if condition
@@ -105,10 +120,24 @@
            (mapcat #(all-in % path) multi-data))))))
 
 (defn get-in
-  [path]
-  (first (all-in path)))
+  "Returns the value in a nested associative structure, where ks is a sequence
+  of keys and filters. Returns nil if the key is not present, or the not-found
+  value if supplied."
+  ([path]
+     (first (all-in path)))
+  ([path not-found]
+     (let [found (all-in path)]
+       (if (= 0 (count found))
+         not-found
+         (first found)))))
 
 (defn on
+  "Calls provided handler when change occurs in path (i.e. if changes appear at
+  or inside whatever happens to be matched by given path).
+
+  Handler receives two arguments - first (data) holds data matched by
+  subscription path and second (path) holds relative path in data argument to
+  actual changed value."
   [path handler]
   (let [full-path (cons :handlers path)
         handlers-path (cons :handlers (conj path :_handlers))]

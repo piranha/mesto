@@ -60,16 +60,16 @@ handler being called.
 
 - `(assoc-in [:items {:id 1} :name] "something")`
 
-  **NEEDS DECISION**
+  Puts `"something"` in property `:name` of item, found by filter `{:id 1}`. If
+  there is no match, fails.
 
-  Puts "x" in item, found by filter `{:id 1}`. If item does not exist, creates
-  it based off filter and appends it in a sequence. If sequence does not exist,
-  creates a vector.
+  TODO: If item does not exist, creates it based off filter and appends it in a
+  sequence. If sequence does not exist, creates a vector.
 
-  Or! Puts "x" in item, found by filter `{:id 1}`. If filter find no match,
-  nothing happens. Creates items only by using literal paths, any "filters" will
-  prevent creation of new elements. Makes it possible to have arbitrary
-  functions as filters
+  Or! TODO: Puts "x" in item, found by filter `{:id 1}`. If filter find no
+  match, nothing happens. Creates items only by using literal paths, any
+  "filters" will prevent creation of new elements. Makes it possible to have
+  arbitrary functions as filters
 
 - `(update-in [:items {:id 1}] fn)`
 
@@ -83,11 +83,9 @@ handler being called.
 
   Returns first item matched by path.
 
-- `(on [items {:id 1}] (fn [path value] (log path value)))`
-
-  **NOT IMPLEMENTED**
+- `(on [items {:id 1}] (fn [data path] (log path value)))`
 
   Notifies when change occurs in path (i.e. if changes appear at or inside
-  whatever happens to be matched by given path). `path` argument holds full path
-  to changed element, and `value` holds value of an item matched by path
+  whatever happens to be matched by given path). `path` argument holds relative
+  path to changed element, and `data` holds value of an item matched by path
   supplied to `on` (not actually changed value).
