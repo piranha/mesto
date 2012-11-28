@@ -29,7 +29,12 @@
     (me/update-in [:items {:id :foo} :votes] inc)
     (is (= 2 (me/get-in [:items {:id :foo} :votes])))))
 
-(deftest simple-event-handler
-  (me/on [:test] (fn [data path] (throw (Exception.))))
-  (testing "Event by path"
-    (is (thrown? Exception (me/assoc-in [:test] "foo")))))
+(deftest event-handlers
+  (testing "Simple event by path"
+    (me/on [:test] (fn [data path] (throw (Exception.))))
+    (is (thrown? Exception (me/assoc-in [:test] "foo"))))
+  (testing "Event by filter"
+    (me/assoc-in [:ev] [{:id 1 :name "x"}])
+    (me/on [:ev {:id 1} :name] (fn [data path] (throw (Exception. data))))
+    (is (thrown-with-msg? Exception #"foo"
+                 (me/assoc-in [:ev {:id 1} :name] "foo")))))

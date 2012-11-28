@@ -25,9 +25,13 @@
 
 ;; utility
 
+(defn- matches
+  [item condition]
+  (= condition (select-keys item (keys condition))))
+
 (defn- multi-by-condition
   [data condition]
-  (filter #(= condition (select-keys % (keys condition))) data))
+  (filter #(matches % condition) data))
 
 (defn- multi-get
   [data condition]
@@ -69,6 +73,12 @@
        (if-not (empty? path)
          (let [condition (first path)
                rest-path (rest path)]
+
+           (doseq [key (keys handlers)]
+             (if (map? key)
+               (doseq [next-data (multi-by-condition data key)]
+                 (notify next-data rest-path (handlers key)))))
+
            (notify (data condition) rest-path (handlers condition)))))))
 
 ;; api
