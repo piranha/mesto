@@ -52,8 +52,7 @@ handler when some changes appear inside of path:
     (me/on [:countries {:name "Ukraine"}]
           (fn [path value] (log "path:" path "value:" value)))
 
-Then updating anything in "Ukraine" item (or removing the item) will result in
-handler being called.
+Then updating anything in "Ukraine" item will result in handler being called.
 
 
 ## API specification
