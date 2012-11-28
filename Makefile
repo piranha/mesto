@@ -1,4 +1,16 @@
-pub:
-	rm -rf target/*.jar
-	lein jar pom
-	scp target/mesto-*.jar pom.xml clojars@clojars.org:
+VERSION := $(shell awk '/defproject/ { gsub("\"", "", $$3); print $$3 }' project.clj)
+JAR := target/mesto-$(VERSION).jar
+
+help:
+	@echo "pub - publish jar to clojars"
+
+
+pub: pom.xml $(JAR)
+	scp @^ clojars@clojars.org:
+
+
+pom.xml: project.clj
+	lein pom
+
+$(JAR): $(shell find src -name '*.clj')
+	lein jar
