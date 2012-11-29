@@ -4,18 +4,22 @@
 
 (deftest simple-assoc
   (testing "Simple assoc"
-    (let [data 1]
-      (me/assoc-in [:some :path] data)
-      (is (= data (me/get-in [:some :path]))))))
+    (me/assoc-in [:some :path :foo] true)
+    (is (true? (me/get-in [:some :path :foo])))))
 
 (deftest find-item
   (let [data {:id 1 :name "foo"}]
     (me/assoc-in [:items] [data])
+
     (testing "Finding by filter"
       (is (= data (me/get-in [:items {:id 1}])))
       (is (= "foo" (me/get-in [:items {:id 1} :name]))))
+
     (testing "Finding by index"
-      (is (= data (me/get-in [:items 0]))))))
+      (is (= data (me/get-in [:items 0]))))
+
+    (testing "Finding by filtering function"
+      (is (= "foo" (me/get-in [:items #(= 1 (% :id)) :name]))))))
 
 (deftest advanced-assoc
   (me/assoc-in [:items] [{:id 1 :name "foo"}])
@@ -33,8 +37,17 @@
   (testing "Simple event by path"
     (me/on [:test] (fn [data path] (throw (Exception.))))
     (is (thrown? Exception (me/assoc-in [:test] "foo"))))
-  (testing "Event by filter"
-    (me/assoc-in [:ev] [{:id 1 :name "x"}])
-    (me/on [:ev {:id 1} :name] (fn [data path] (throw (Exception. data))))
+
+  (testing "Event by map filter"
+    (me/assoc-in [:map] [{:id 1 :name "bar"}])
+    (me/on [:ev {:id 1} :name]
+           (fn [data path] (throw (Exception. data))))
     (is (thrown-with-msg? Exception #"foo"
-                 (me/assoc-in [:ev {:id 1} :name] "foo")))))
+          (me/assoc-in [:ev {:id 1} :name] "foo"))))
+
+  (testing "Event by function filter"
+    (me/assoc-in [:fn] [{:id 1 :name "bar"}])
+    (me/on [:ev #(= 1 (:id %)) :name]
+           (fn [data path] (throw (Exception. data))))
+    (is (thrown-with-msg? Exception #"foo"
+          (me/assoc-in [:ev {:id 1} :name] "foo")))))

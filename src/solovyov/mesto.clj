@@ -25,26 +25,38 @@
 
 ;; utility
 
-(defn- matches
+(defn- matches-map
   [item condition]
   (= condition (select-keys item (keys condition))))
 
-(defn- multi-by-condition
+(defn- multi-by-map
   [data condition]
-  (filter #(matches % condition) data))
+  (filter #(matches-map % condition) data))
+
+(defn- multi-by-fn
+  [data condition]
+  (let [found (filter condition data)]
+    (if (map? data)
+      (map second found)
+      found)))
 
 (defn- multi-get
   [data condition]
-  (if (map? condition)
-    (multi-by-condition data condition)
-    (if (integer? condition)
-      [(data condition)]
-      [(condition data)])))
+  (if data
+    (cond
+     (map? condition) (multi-by-map data condition)
+     (fn? condition) (multi-by-fn data condition)
+     :else (if-let [rv (data condition)] [rv] []))
+
+    []))
 
 (defn- multi-path
   [data found condition]
-  (if-not (map? condition)
+  (if (or (keyword? condition) (integer? condition))
+    ;; simple conditions are going without changes
     [condition]
+    ;; FIXME: indexOf limits us here only to arrays... should maps filtered by
+    ;; some condition be supported? Probably so.
     (map #(.indexOf data %) found)))
 
 (defn- gather-paths-bits
@@ -52,7 +64,8 @@
   (let [multi-data (multi-get data condition)
         bit (multi-path data multi-data condition)]
     (if path
-      (apply conj [bit] (mapcat #(gather-paths-bits % path) multi-data))
+      (apply conj [bit] (mapcat #(gather-paths-bits % path)
+                                (if-not (empty? multi-data) multi-data [nil])))
       [bit])))
 
 (defn- paths-to
@@ -67,7 +80,7 @@
   ([data path handlers]
      (when-not (empty? handlers)
 
-       (doseq [f (handlers :_handlers [])]
+       (doseq [f (handlers :-handlers [])]
          (f data path))
 
        (if-not (empty? path)
@@ -75,11 +88,8 @@
                rest-path (rest path)]
 
            (doseq [key (keys handlers)]
-             (if (map? key)
-               (doseq [next-data (multi-by-condition data key)]
-                 (notify next-data rest-path (handlers key)))))
-
-           (notify (data condition) rest-path (handlers condition)))))))
+             (doseq [next-data (multi-get data key)]
+               (notify next-data rest-path (handlers key)))))))))
 
 ;; api
 
@@ -140,7 +150,9 @@
   actual changed value."
   [path handler]
   (let [full-path (cons :handlers path)
-        handlers-path (cons :handlers (conj path :_handlers))]
-    (if-not (get-in full-path)
+        handlers-path (cons :handlers (conj path :-handlers))]
+    ;; regular core/get-in here, because we set literal items (filters as
+    ;; handler map keys, not as filters)
+    (if-not (cj/get-in @world full-path)
       (swap! world cj/assoc-in handlers-path #{}))
     (swap! world cj/update-in handlers-path conj handler)))
