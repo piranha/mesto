@@ -6,7 +6,7 @@ help:
 
 
 pub: pom.xml $(JAR)
-	scp @^ clojars@clojars.org:
+	scp $^ clojars@clojars.org:
 
 
 pom.xml: project.clj
