@@ -1,6 +1,6 @@
 (ns solovyov.mesto
   (:refer-clojure :exclude [update-in assoc-in get-in])
-  (:require [clojure.core :as cj]))
+  (:require [cljs.core :as cj]))
 
 (def world (atom {}))
 

@@ -1,4 +1,4 @@
-(defproject solovyov/mesto "0.2.0"
+(defproject solovyov/mesto "0.2.1"
   :description "In-memory storage for ClojureScript applications"
   :url "http://github.com/piranha/mesto/"
   :license {:name "Eclipse Public License"
@@ -9,7 +9,14 @@
               {
                :main {
                       :source-path "src"
-                      :compiler {:output-to "build/storage.js"}
+                      :compiler {:output-to "build/mesto.js"}
+                      }
+               :mini {
+                      :source-path "src"
+                      :compiler {
+                                 :output-to "build/mini.js"
+                                 :optimizations :advanced
+                                 }
                       }
                }
               }
