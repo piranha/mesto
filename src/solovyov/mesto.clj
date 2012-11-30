@@ -85,11 +85,14 @@
 
        (if-not (empty? path)
          (let [condition (first path)
-               rest-path (rest path)]
+               rest-path (rest path)
+               changed-data (data condition)]
 
            (doseq [key (keys handlers)]
-             (doseq [next-data (multi-get data key)]
-               (notify next-data rest-path (handlers key)))))))))
+             (if (or (and (map? key) (matches-map changed-data key))
+                     (and (fn? key) (true? (key changed-data)))
+                     (= key condition))
+               (notify changed-data rest-path (handlers key)))))))))
 
 ;; api
 

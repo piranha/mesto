@@ -35,19 +35,20 @@
 
 (deftest event-handlers
   (testing "Simple event by path"
-    (me/on [:test] (fn [data path] (throw (Exception.))))
+    (me/on [:test] (fn [data path]
+                     (throw (Exception.))))
     (is (thrown? Exception (me/assoc-in [:test] "foo"))))
 
   (testing "Event by map filter"
     (me/assoc-in [:map] [{:id 1 :name "bar"}])
-    (me/on [:ev {:id 1} :name]
+    (me/on [:map {:id 1} :name]
            (fn [data path] (throw (Exception. data))))
     (is (thrown-with-msg? Exception #"foo"
-          (me/assoc-in [:ev {:id 1} :name] "foo"))))
+          (me/assoc-in [:map {:id 1} :name] "foo"))))
 
   (testing "Event by function filter"
     (me/assoc-in [:fn] [{:id 1 :name "bar"}])
-    (me/on [:ev #(= 1 (:id %)) :name]
+    (me/on [:fn #(= 1 (:id %)) :name]
            (fn [data path] (throw (Exception. data))))
     (is (thrown-with-msg? Exception #"foo"
-          (me/assoc-in [:ev {:id 1} :name] "foo")))))
+          (me/assoc-in [:fn {:id 1} :name] "foo")))))
