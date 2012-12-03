@@ -23,6 +23,17 @@
 
 ;; utility
 
+(defn- index-of ;; cljs PersistentVector has no .indexOf method :(
+  [coll item]
+  (loop [coll coll
+         idx 0]
+    (let [current (first coll)]
+      (if-not current
+        -1
+        (if (= item current)
+          idx
+          (recur (rest coll) (inc idx)))))))
+
 (defn- matches-map
   [item condition]
   (= condition (select-keys item (keys condition))))
@@ -55,7 +66,7 @@
     [condition]
     ;; FIXME: indexOf limits us here only to arrays... should maps filtered by
     ;; some condition be supported? Probably so.
-    (map #(.indexOf data %) found)))
+    (map #(index-of data %) found)))
 
 (defn- gather-paths-bits
   [data [condition & path]]

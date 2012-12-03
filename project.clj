@@ -1,4 +1,4 @@
-(defproject solovyov/mesto "0.3.0"
+(defproject solovyov/mesto "0.3.2"
   :description "In-memory storage for ClojureScript applications"
   :url "http://github.com/piranha/mesto/"
   :license {:name "Eclipse Public License"
