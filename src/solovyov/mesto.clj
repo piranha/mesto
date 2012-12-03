@@ -1,6 +1,6 @@
 (ns solovyov.mesto
   (:refer-clojure :exclude [update-in assoc-in get-in])
-  (:require [cljs.core :as cj]))
+  (:require [clojure.core :as cj]))
 
 (defn cartesian-product
   "All the ways to take one item from each sequence"
